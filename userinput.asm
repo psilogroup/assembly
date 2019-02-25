@@ -4,9 +4,9 @@
 ;ld -o userinput userinput.o
 
 section .data
-  str1 db "Qual e o seu nome?",10 ;declara str1
+  str1 db "Qual e o seu nome?",10,0 ;declara str1
   str1len equ $-str1 ;tamanho da str1
-  str2 db "Bem vindo " ;declara str2
+  str2 db "Bem vindo ",0 ;declara str2
   str2len equ $-str2 ;tamanho da str2
 
 section .bss
@@ -16,22 +16,17 @@ section .text
   global _start
 
 _start:
-  call _printStr1
+  mov rax,str1
+  call _print
   call _lerNome
-  call _printStr2
-  call _printNome
+  mov rax,str2
+  call _print
+  mov rax,nome
+  call _print
 
   mov rax,60 ;syscall exit
   mov rdi,0 ;exit code 0
   syscall ;call exit
-
-_printStr1:
-  mov rax,1 ;syscall sys_write
-  mov rdi,1 ;imprime em stdout
-  mov rsi,str1 ;ponteiro para mensagem
-  mov rdx,str1len ;tamanho da mensagem
-  syscall
-  ret
 
 _lerNome:
   mov rax, 0 ;sys_read
@@ -41,18 +36,18 @@ _lerNome:
   syscall
   ret
 
-_printStr2:
-  mov rax,1 ;syscall sys_write
-  mov rdi,1 ;imprime em stdout
-  mov rsi,str2 ;ponteiro para mensagem
-  mov rdx,str2len ;tamanho da mensagem
-  syscall
-  ret
-
-_printNome:
-  mov rax,1 ;syscall sys_write
-  mov rdi,1 ;imprime em stdout
-  mov rsi,nome ;ponteiro para mensagem
-  mov rdx,16 ;tamanho da mensagem
+_print:
+  push rax ;coloca rax (inicio do texto), na stack
+  mov rbx, 0 ;rbx = 0
+_printLoop:
+  inc rax ;rax = rax + 1 (*ptr++)
+  inc rbx ;rbx = rbx + 1
+  mov cl, [rax] ;copia 8 bits do endereco de memoria em rax para cl)
+  cmp cl, 0 ;cl == 0?
+  jne _printLoop ;volta para o inicio do loop
+  mov rax, 1 ;sys_write
+  mov rdi, 1 ;stdout
+  pop rsi ;rsi = pego o endereco do inicio da string da stack
+  mov rdx, rbx ;rbx = count (strlen)
   syscall
   ret
