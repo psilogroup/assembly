@@ -4,9 +4,9 @@
 ;ld -o userinput userinput.o
 
 section .data
-  str1 db "Qual e o seu nome?",10,0 ;declara str1
+  str1 db "Qual e o seu nome?",0x10,0x0 ;declara str1
   str1len equ $-str1 ;tamanho da str1
-  str2 db "Bem vindo ",0 ;declara str2
+  str2 db "Bem vindo ",0x0 ;declara str2
   str2len equ $-str2 ;tamanho da str2
 
 section .bss
